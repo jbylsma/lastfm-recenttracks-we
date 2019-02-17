@@ -1,0 +1,13 @@
+{
+  "manifest_version": 2,
+  "name": "Last.fm Recent Tracks",
+  "version": "1.0",
+  "description": "Show recent tracks for Last.fm users.",
+  "icons": {
+    "48": "icons/logo.svg",
+    "96": "icons/logo.svg"
+  },
+  "chrome_url_overrides": {
+    "newtab": "static/newtab.html"
+  }
+}
