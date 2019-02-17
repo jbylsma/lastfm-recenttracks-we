@@ -4,8 +4,8 @@
   "version": "1.0",
   "description": "Show recent tracks for Last.fm users.",
   "icons": {
-    "48": "icons/logo.svg",
-    "96": "icons/logo.svg"
+    "48": "static/logo/ff-lastfm-recenttracks_48px.png",
+    "96": "static/logo/ff-lastfm-recenttracks_96px.png"
   },
   "chrome_url_overrides": {
     "newtab": "static/newtab.html"
