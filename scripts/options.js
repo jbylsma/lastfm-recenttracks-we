@@ -1,29 +1,20 @@
 'use strict';
 
-let options = new Map([
-    ['apiKey', ''],
-    ['fetchLimit', 10]
-]);
-
-function saveOptions(e) {
-    let value = {};
-    options.forEach(function(defaultValue, key) {
-        value[key] = document.querySelector('#' + key).value;
-
-    });
-    browser.storage.local.set(value);
-    e.preventDefault();
-}
-
-function restoreOptions() {
-    options.forEach(function(defaultValue, key) {
-        let storageItem = browser.storage.local.get(key);
-
-        storageItem.then((res) => {
-            document.querySelector('#' + key).value = res[key] || defaultValue;
-        });
+function storeSettings() {
+    browser.storage.local.set({
+        apiKey: document.querySelector('#apiKey').value,
+        fetchLimit: document.querySelector('#fetchLimit').value,
     });
 }
 
-document.addEventListener('DOMContentLoaded', restoreOptions);
-document.querySelector("form").addEventListener("submit", saveOptions);
+function updateUI(restoredSettings) {
+    document.querySelector('#apiKey').value = restoredSettings.apiKey;
+    document.querySelector('#fetchLimit').value = restoredSettings.fetchLimit;
+}
+
+
+const gettingStoredSettings = browser.storage.local.get();
+gettingStoredSettings.then(updateUI);
+
+const saveButton = document.querySelector("#save-button");
+saveButton.addEventListener("click", storeSettings);
