@@ -1,0 +1,8 @@
+.option {
+    margin: 1rem auto;
+}
+
+.option label {
+    display: inline-block;
+    width: 20rem;
+}

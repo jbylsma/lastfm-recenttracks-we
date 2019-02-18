@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <link href="styles/options.css" rel="stylesheet" />
+</head>
+<body>
+<form>
+    <div class="option">
+        <label for="apiKey">Last.fm API Key</label>
+        <input type="text" id="apiKey" />
+    </div>
+    <div class="option">
+        <label for="fetchLimit">Number of results per user (1-200)</label>
+        <input id="fetchLimit" type="number" min="1" max="200" />
+    </div>
+    <button type="submit">Save</button>
+</form>
+<script src="scripts/options.js"></script>
+</body>
+</html>

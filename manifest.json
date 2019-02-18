@@ -3,11 +3,22 @@
   "name": "Last.fm Recent Tracks",
   "version": "1.0",
   "description": "Show recent tracks for Last.fm users.",
+  "applications": {
+    "gecko": {
+      "id": "ff-lastfm-recenttracks@example.com"
+    }
+  },
   "icons": {
     "48": "static/logo/ff-lastfm-recenttracks_48px.png",
     "96": "static/logo/ff-lastfm-recenttracks_96px.png"
   },
+  "permissions": [
+    "storage"
+  ],
   "chrome_url_overrides": {
     "newtab": "static/newtab.html"
+  },
+  "options_ui": {
+    "page": "static/options.html"
   }
 }
