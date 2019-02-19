@@ -1,20 +1,33 @@
 'use strict';
 
-function storeSettings() {
-    browser.storage.local.set({
-        apiKey: document.querySelector('#apiKey').value,
-        fetchLimit: document.querySelector('#fetchLimit').value,
+/**
+ * Save extension settings.
+ */
+function saveSettings() {
+    let settings = {};
+    document.querySelectorAll('form input:not([type="submit"])').forEach((element) => {
+        let id;
+        id = element.getAttribute('id');
+        settings[id] = element.value;
     });
+
+    browser.storage.local.set(settings);
 }
 
-function updateUI(restoredSettings) {
-    document.querySelector('#apiKey').value = restoredSettings.apiKey;
-    document.querySelector('#fetchLimit').value = restoredSettings.fetchLimit;
+/**
+ * Update form fields with extension settings.
+ * @param settings
+ */
+function updateUI(settings) {
+    for (let prop in settings) {
+        if (settings.hasOwnProperty(prop)) {
+            document.querySelector('#' + prop).value = settings[prop];
+        }
+    }
 }
 
-
-const gettingStoredSettings = browser.storage.local.get();
-gettingStoredSettings.then(updateUI);
+const settings = browser.storage.local.get();
+settings.then(updateUI);
 
 const saveButton = document.querySelector('input[type=submit]');
-saveButton.addEventListener("click", storeSettings);
+saveButton.addEventListener('click', saveSettings);
