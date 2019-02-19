@@ -16,5 +16,5 @@ function updateUI(restoredSettings) {
 const gettingStoredSettings = browser.storage.local.get();
 gettingStoredSettings.then(updateUI);
 
-const saveButton = document.querySelector("#save-button");
+const saveButton = document.querySelector('input[type=submit]');
 saveButton.addEventListener("click", storeSettings);
