@@ -2,7 +2,8 @@
 
 const DEFAULT_SETTINGS = {
     'apiKey': '',
-    'fetchLimit': 10
+    'fetchLimit': 10,
+    'users': ''
 };
 
 const UPDATE_INTERVAL= 120;
