@@ -1,5 +1,6 @@
 'use strict';
 
+// Main container for output.
 let main = document.querySelector('main');
 
 // Plain-text descriptions for possible error messages.
@@ -9,24 +10,53 @@ const ERROR_DESCRIPTIONS = {
     apiFail: 'The Last.fm API request failed.',
 };
 
+/**
+ * Syntactic sugar for creating elements.
+ *
+ * @param type The type of Element to create. Use `text` for a textNode.
+ * @param text The text for the Element.
+ */
+function createElem(type, text = null) {
+    if (text === null) {
+        return document.createElement(type);
+    }
+
+    let textNode = document.createTextNode(text);
+
+    if (type === 'text') {
+        return textNode;
+    }
+
+    return document.createElement(type).appendChild(textNode);
+}
+
 // Listen for messages from background Javascript.
 browser.runtime.onMessage.addListener((message) => {
     main.textContent = '';
 
     if (message.status === 'success') {
-        // TODO: Format and output data.
-        console.log('success');
-        console.log(message);
-        console.log(message.data);
+        let data = message.data.recenttracks;
+        console.log(data);
+
+        main.appendChild(createElem('header', `${data['@attr'].user}::recent`));
+
+        let list = createElem('ul');
+        data.track.forEach((track) => {
+            let item = createElem('li');
+            // TODO: Add dates.
+            // TODO: Handle Now Playing.
+            item.textContent = `${track.artist['#text']} - ${track.name}`;
+            list.appendChild(item);
+        });
+        main.appendChild(list);
     }
     else {
-        let errorParagraph = document.createElement('p');
+        let errorParagraph = createElem('p');
 
         switch (message.name) {
             case 'settingsApiKey':
             case 'settingsUsers':
-                let optionsLink = document.createElement('a');
-                optionsLink.textContent = ERROR_DESCRIPTIONS[message.name];
+                let optionsLink = createElem('a', ERROR_DESCRIPTIONS[message.name]);
                 optionsLink.setAttribute('href', '');
 
                 optionsLink.addEventListener('click', function() {
@@ -37,8 +67,8 @@ browser.runtime.onMessage.addListener((message) => {
                 break;
 
             case 'apiFail':
-                errorParagraph.appendChild(document.createTextNode(ERROR_DESCRIPTIONS[message.name]));
-                errorParagraph.appendChild(document.createElement('br'));
+                errorParagraph.appendChild(createElem('text', ERROR_DESCRIPTIONS[message.name]));
+                errorParagraph.appendChild(createElem('br'));
 
                 let explaination;
                 if (message.data.status === 0) {
@@ -47,11 +77,11 @@ browser.runtime.onMessage.addListener((message) => {
                 else {
                     explaination = `${message.data.status}: ${message.data.statusText}`;
                 }
-                errorParagraph.appendChild(document.createTextNode(explaination));
+                errorParagraph.appendChild(createElem('text', explaination));
                 break;
                 
             default:
-                errorParagraph.appendChild(document.createTextNode( 'Unhandled error. Whoops!'));
+                errorParagraph.appendChild(createElem('text', 'Unhandled error. Whoops!'));
                 break;
         }
 
