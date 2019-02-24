@@ -75,17 +75,20 @@ function getRecentTracks(storedSettings) {
     let xhr = new XMLHttpRequest();
     xhr.open('GET', url);
     xhr.onreadystatechange = function() {
-        if (this.readyState === 4) {
-            if (this.status === 200) {
-                sendSuccess(JSON.parse(xhr.response));
-            }
-            else {
-                sendError('apiFail', xhr);
-            }
+        if (this.readyState !== 4) {
+            return;
         }
-    };
-    xhr.onabort = xhr.onerror = function() {
-        sendError('xhrFail', xhr);
+
+        if (this.status === 200) {
+            sendSuccess(JSON.parse(xhr.response));
+        }
+        else {
+            // Bad requests return status 0.
+            sendError('apiFail', {
+                status: this.status,
+                statusText: this.statusText,
+            });
+        }
     };
     xhr.send();
 }
