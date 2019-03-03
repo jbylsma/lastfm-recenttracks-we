@@ -36,16 +36,36 @@ browser.runtime.onMessage.addListener((message) => {
 
     if (message.status === 'success') {
         let data = message.data.recenttracks;
-        console.log(data);
 
         main.appendChild(createElem('header', `${data['@attr'].user}::recent`));
 
         let list = createElem('ul');
         data.track.forEach((track) => {
             let item = createElem('li');
-            // TODO: Add dates.
-            // TODO: Handle Now Playing.
-            item.textContent = `${track.artist['#text']} - ${track.name}`;
+            let nowPlaying = false;
+
+            let date;
+            if (track.hasOwnProperty('date')) {
+                date = new Date(track.date.uts * 1000);
+            }
+            else {
+                date = new Date();
+                nowPlaying = true
+            }
+
+            let year = date.getFullYear();
+            let month = (date.getMonth() + 1).toString().padStart(2, 0);
+            let day = date.getDate().toString().padStart(2, 0);
+            let hour = date.getHours().toString().padStart(2, 0);
+            let minute = date.getMinutes().toString().padStart(2, 0);
+
+            item.textContent = `[${year}-${month}-${day} ${hour}:${minute}] ${track.artist['#text']} - ${track.name}`;
+
+            // Add a music note if the user is currently listening.
+            if (nowPlaying) {
+                item.textContent += ' \u266B';
+            }
+
             list.appendChild(item);
         });
         main.appendChild(list);
