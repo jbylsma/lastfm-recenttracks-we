@@ -3,6 +3,8 @@
 // Main container for output.
 let main = document.querySelector('main');
 
+const LASTFM_URL = 'https://www.last.fm';
+
 // Plain-text descriptions for possible error messages.
 const ERROR_DESCRIPTIONS = {
     settingsApiKey: 'The Last.fm API Key has not been set.',
@@ -37,7 +39,12 @@ browser.runtime.onMessage.addListener((message) => {
     if (message.status === 'success') {
         let data = message.data.recenttracks;
 
-        main.appendChild(createElem('header', `${data['@attr'].user}::recent`));
+        let user = createElem('a', `${data['@attr'].user}::recent`);
+        user.setAttribute('href', LASTFM_URL + '/user/' + data['@attr'].user);
+
+        let header = createElem('header');
+        header.appendChild(user);
+        main.appendChild(header);
 
         let list = createElem('ul');
         data.track.forEach((track) => {
