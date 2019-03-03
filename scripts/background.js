@@ -45,13 +45,34 @@ function sendError(name, data = {}) {
     });
 }
 
+/**
+ * Sets up an Alarm to sleep for ~91 seconds before checking for recent tracks again
+ * (the length of The Beatles' "Golden Slumbers")
+ */
+function setUpPolling() {
+
+    browser.alarms.onAlarm.addListener((alarm) => {
+        switch(alarm.name) {
+            case 'pollForRecentTracks':
+                const gettingStoredSettings = browser.storage.local.get();
+                gettingStoredSettings.then(getRecentTracks);
+                break;
+
+        default:
+            console.error('No alarm found: %s', alarm.name);
+        }
+
+    });
+
+    browser.alarms.create("pollForRecentTracks", {periodInMinutes: 1.5167});
+}
 
 /**
  * Get users' recent tracks.
  */
 function getRecentTracks(storedSettings) {
     // TODO: How to handle settings changes.
-    // TODO: Only check every X minutes, cache results.
+    // TODO: Cache results?  (do we need to if we poll?)
     // TODO: Locking system?
     // TODO: Handle multiple users
 
@@ -98,7 +119,9 @@ browser.runtime.onMessage.addListener((action) => {
     switch (action) {
         case 'getRecentTracks':
             const gettingStoredSettings = browser.storage.local.get();
-            gettingStoredSettings.then(getRecentTracks);
+            gettingStoredSettings
+                .then(getRecentTracks)      // get recent tracks right away
+                .then(setUpPolling);        // then set up polling so those recent tracks stay recent
             break;
 
         default:

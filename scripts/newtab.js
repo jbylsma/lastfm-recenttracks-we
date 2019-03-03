@@ -116,5 +116,4 @@ browser.runtime.onMessage.addListener((message) => {
     }
 });
 
-// TODO: Run constantly, not just on load.
 browser.runtime.sendMessage('getRecentTracks');

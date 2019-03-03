@@ -13,3 +13,4 @@ Requires a [Last.fm API key](https://www.last.fm/api/account/create).
  
 * [Favorite Colour](https://github.com/mdn/webextensions-examples/tree/master/favourite-colour)
 * [Forget It!](https://github.com/mdn/webextensions-examples/tree/master/forget-it)
+* [chill-out](https://github.com/mdn/webextensions-examples/tree/master/chill-out)

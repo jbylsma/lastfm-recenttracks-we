@@ -13,7 +13,8 @@
     "96": "logo/ff-lastfm-recenttracks_96px.png"
   },
   "permissions": [
-    "storage"
+    "storage",
+    "alarms"
   ],
   "background": {
     "scripts": [
