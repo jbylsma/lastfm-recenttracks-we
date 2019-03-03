@@ -27,7 +27,7 @@ function createElem(type, text = null) {
         return textNode;
     }
 
-    return document.createElement(type).appendChild(textNode);
+    return document.createElement(type).appendChild(textNode).parentElement;
 }
 
 // Listen for messages from background Javascript.
