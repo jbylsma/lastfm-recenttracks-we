@@ -74,7 +74,7 @@ function getRecentTracks(storedSettings) {
     // TODO: How to handle settings changes.
     // TODO: Cache results?  (do we need to if we poll?)
     // TODO: Locking system?
-    // TODO: Handle multiple users
+    // TODO: Display of multiple users jumps around (House of Pain style) - stop it somehow.
 
     if (storedSettings['apiKey'].trim().length === 0) {
         sendError('settingsApiKey');
@@ -86,11 +86,33 @@ function getRecentTracks(storedSettings) {
         return;
     }
 
+    let users = storedSettings['users'];
+
+    // if we have a semi-colon, we've got multiple users to deal with
+    if (users.indexOf(';') > 0) {
+        users = users.split(";");
+    }
+
+    // loop through all of our users and fetch those tracks
+    for (var i=0; i < users.length; i++) {
+        let userName = users[i].trim();
+        getRecentTracksForUser(userName, storedSettings['apiKey'], storedSettings['fetchLimit']);
+    }
+}
+
+/**
+ * Fetches recent tracks for the given last.fm user
+
+ * @param user username of the last.fm user in question
+ * @param apiKey key used to connect to last.fm API
+ * @param fetchLimit integer value of how many tracks to fetch
+ */
+function getRecentTracksForUser(user, apiKey, fetchLimit) {
     let url = LASTFM_API_URL +
         '?method=user.getrecenttracks' +
-        '&api_key=' + encodeURIComponent(storedSettings['apiKey']) +
-        '&user=' + encodeURIComponent(storedSettings['users']) +
-        '&limit=' + encodeURIComponent(storedSettings['fetchLimit']) +
+        '&api_key=' + encodeURIComponent(apiKey) +
+        '&user=' + encodeURIComponent(user) +
+        '&limit=' + encodeURIComponent(fetchLimit) +
         '&format=json';
 
     let xhr = new XMLHttpRequest();

@@ -34,17 +34,29 @@ function createElem(type, text = null) {
 
 // Listen for messages from background Javascript.
 browser.runtime.onMessage.addListener((message) => {
-    main.textContent = '';
 
     if (message.status === 'success') {
         let data = message.data.recenttracks;
 
-        let user = createElem('a', `${data['@attr'].user}::recent`);
-        user.setAttribute('href', LASTFM_URL + '/user/' + data['@attr'].user);
+        // if it doesn't already exist, create a container for all of this user's info; id is the username
+        let userDiv = document.getElementById(data['@attr'].user);
+
+        // if it doesn't exist, create it!   if it does, re-use it
+        if (userDiv == null) {
+            userDiv = createElem('div');
+            userDiv.setAttribute('id', data['@attr'].user);
+        } else {
+            // clean out the old
+            while (userDiv.firstChild) {
+                userDiv.removeChild(userDiv.firstChild);
+            }
+        }
 
         let header = createElem('header');
+        let user = createElem('a', `${data['@attr'].user}::recent`);
+        user.setAttribute('href', LASTFM_URL + '/user/' + data['@attr'].user);
         header.appendChild(user);
-        main.appendChild(header);
+        userDiv.appendChild(header);
 
         let list = createElem('ul');
         data.track.forEach((track) => {
@@ -75,7 +87,9 @@ browser.runtime.onMessage.addListener((message) => {
 
             list.appendChild(item);
         });
-        main.appendChild(list);
+
+        userDiv.appendChild(list);
+        main.appendChild(userDiv);
     }
     else {
         let errorParagraph = createElem('p');
