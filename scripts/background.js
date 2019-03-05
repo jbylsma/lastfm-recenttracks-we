@@ -86,12 +86,7 @@ function getRecentTracks(storedSettings) {
         return;
     }
 
-    let users = storedSettings['users'];
-
-    // if we have a semi-colon, we've got multiple users to deal with
-    if (users.indexOf(';') > 0) {
-        users = users.split(";");
-    }
+    let users = storedSettings['users'].split(';');
 
     // loop through all of our users and fetch those tracks
     for (var i=0; i < users.length; i++) {
