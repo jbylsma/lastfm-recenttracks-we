@@ -145,4 +145,9 @@ browser.runtime.onMessage.addListener((message, sender) => {
     }
 });
 
+const refreshButton = document.querySelector('#refresh');
+refreshButton.addEventListener('click', function() {
+    browser.runtime.sendMessage('resetPolling');
+});
+
 browser.runtime.sendMessage('getRecentTracks');

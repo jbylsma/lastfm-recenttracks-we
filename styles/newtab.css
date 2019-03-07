@@ -12,3 +12,7 @@ body {
 a {
     color: #B90000;
 }
+
+#refresh {
+    float: right;
+}
