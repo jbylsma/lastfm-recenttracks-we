@@ -8,16 +8,9 @@ const DEFAULT_SETTINGS = {
 
 const LASTFM_API_URL = 'http://ws.audioscrobbler.com/2.0/';
 
-// Populate missing default settings on startup.
-const gettingStoredSettings = browser.storage.local.get();
-gettingStoredSettings.then((settings) => {
-    for (let prop in DEFAULT_SETTINGS) {
-        if (!settings[prop]) {
-            browser.storage.local.set(DEFAULT_SETTINGS);
-            break;
-        }
-    }
-});
+// Poll period for recent tracks period.
+// ~91 seconds (the length of The Beatles' "Golden Slumbers")
+const POLLING_DELAY = 1.5167;
 
 // Module for caching API responses and sending message.
 let responseCache = (function() {
@@ -53,10 +46,17 @@ let responseCache = (function() {
  * Get users' recent tracks.
  */
 function getRecentTracks() {
-    // TODO: How to handle settings changes.
-
     const gettingStoredSettings = browser.storage.local.get();
     gettingStoredSettings.then(function(storedSettings) {
+        // Populate missing default settings on startup.
+        for (let prop in DEFAULT_SETTINGS) {
+            if (!storedSettings.hasOwnProperty(prop)) {
+                storedSettings = DEFAULT_SETTINGS;
+                browser.storage.local.set(DEFAULT_SETTINGS);
+                break;
+            }
+        }
+
         if (storedSettings['apiKey'].trim().length === 0) {
             responseCache.setError('settingsApiKey');
             return;
@@ -82,11 +82,11 @@ function getRecentTracks() {
 }
 
 /**
- * Fetches recent tracks for the given last.fm user
-
- * @param user username of the last.fm user in question
- * @param apiKey key used to connect to last.fm API
- * @param fetchLimit integer value of how many tracks to fetch
+ * Fetches recent tracks for the given last.fm user.
+ *
+ * @param user Username of the last.fm user in question.
+ * @param apiKey Key used to connect to last.fm API.
+ * @param fetchLimit Integer value of how many tracks to fetch.
  */
 function getRecentTracksForUser(user, apiKey, fetchLimit) {
     return new Promise(function(resolve) {
@@ -125,22 +125,23 @@ function getRecentTracksForUser(user, apiKey, fetchLimit) {
     });
 }
 
-// Listen for messages from the options and newtab pages.
-browser.runtime.onMessage.addListener((action) => {
-    switch (action) {
-        case 'getRecentTracks':
-            responseCache.sendMessage();
-            break;
-
-        default:
-            console.error('No action found: %s', action);
-    }
-});
-
 /**
- * Sets up an Alarm to sleep for ~91 seconds before checking for recent tracks again
- * (the length of The Beatles' "Golden Slumbers")
+ * Set up periodic polling for recent tracks.
+ *
+ * @param reset Whether or not to reset the alarm.
  */
+function setupPolling(reset = false) {
+    if (reset) {
+        browser.alarms.clear('pollForRecentTracks');
+    }
+
+    browser.alarms.create('pollForRecentTracks', {
+        periodInMinutes: POLLING_DELAY,
+    });
+    getRecentTracks();
+}
+
+// Respond to the polling alarms.
 browser.alarms.onAlarm.addListener((alarm) => {
     switch(alarm.name) {
         case 'pollForRecentTracks':
@@ -152,8 +153,23 @@ browser.alarms.onAlarm.addListener((alarm) => {
     }
 
 });
-// TODO: Don't set up polling unless API Key and Users are set.
-browser.alarms.create("pollForRecentTracks", {periodInMinutes: 1.5167});
 
+// Listen for messages from the options and newtab pages.
+browser.runtime.onMessage.addListener((action) => {
+    switch (action) {
+        case 'getRecentTracks':
+            responseCache.sendMessage();
+            break;
+
+        case 'resetPolling':
+            setupPolling(true);
+            break;
+
+        default:
+            console.error('No action found: %s', action);
+    }
+});
+
+// TODO: Don't set up polling unless API Key and Users are set.
 // Kick out the scrobs, mother father.
-getRecentTracks();
+setupPolling();

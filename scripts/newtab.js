@@ -34,7 +34,16 @@ function createElem(type, text = null) {
 
 // Listen for messages from background Javascript.
 browser.runtime.onMessage.addListener((message, sender) => {
-    // TODO: ignore if sender isn't background.
+    // Ignore messages from other tabs.
+    if (sender.hasOwnProperty('tab')) {
+       return;
+    }
+
+    // Clear out <main>.
+    while (main.firstChild) {
+        main.removeChild(main.firstChild);
+    }
+
     if (message.status === 'success') {
         message.responses.forEach(function(response) {
             let data = response.response.recenttracks;

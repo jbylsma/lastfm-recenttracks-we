@@ -11,7 +11,8 @@ function saveSettings() {
         settings[id] = element.value;
     });
 
-    browser.storage.local.set(settings);
+    browser.storage.local.set(settings)
+        .then(browser.runtime.sendMessage('resetPolling'));
 }
 
 /**
@@ -29,5 +30,5 @@ function updateUI(settings) {
 const settings = browser.storage.local.get();
 settings.then(updateUI);
 
-const saveButton = document.querySelector('input[type=submit]');
+const saveButton = document.querySelector('input[type=button]');
 saveButton.addEventListener('click', saveSettings);
