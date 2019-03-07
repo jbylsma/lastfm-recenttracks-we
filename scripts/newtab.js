@@ -8,7 +8,7 @@ const LASTFM_URL = 'https://www.last.fm';
 // Plain-text descriptions for possible error messages.
 const ERROR_DESCRIPTIONS = {
     settingsApiKey: 'The Last.fm API Key has not been set.',
-    settingsUsers: 'The Last.fm users have not been set.',
+    settingsUsers: 'No Last.fm users have been set.',
     apiFail: 'The Last.fm API request failed.',
 };
 
@@ -33,63 +33,66 @@ function createElem(type, text = null) {
 }
 
 // Listen for messages from background Javascript.
-browser.runtime.onMessage.addListener((message) => {
-
+browser.runtime.onMessage.addListener((message, sender) => {
+    // TODO: ignore if sender isn't background.
     if (message.status === 'success') {
-        let data = message.data.recenttracks;
+        message.responses.forEach(function(response) {
+            let data = response.response.recenttracks;
 
-        // if it doesn't already exist, create a container for all of this user's info; id is the username
-        let userDiv = document.getElementById(data['@attr'].user);
+            // if it doesn't already exist, create a container for all of this user's info; id is the username
+            let userDiv = document.getElementById(data['@attr'].user);
 
-        // if it doesn't exist, create it!   if it does, re-use it
-        if (userDiv == null) {
-            userDiv = createElem('div');
-            userDiv.setAttribute('id', data['@attr'].user);
-        } else {
-            // clean out the old
-            while (userDiv.firstChild) {
-                userDiv.removeChild(userDiv.firstChild);
-            }
-        }
-
-        let header = createElem('header');
-        let user = createElem('a', `${data['@attr'].user}::recent`);
-        user.setAttribute('href', LASTFM_URL + '/user/' + data['@attr'].user);
-        header.appendChild(user);
-        userDiv.appendChild(header);
-
-        let list = createElem('ul');
-        data.track.forEach((track) => {
-            let item = createElem('li');
-            let nowPlaying = false;
-
-            let date;
-            if (track.hasOwnProperty('date')) {
-                date = new Date(track.date.uts * 1000);
-            }
-            else {
-                date = new Date();
-                nowPlaying = true
+            // if it doesn't exist, create it!   if it does, re-use it
+            if (userDiv == null) {
+                userDiv = createElem('div');
+                userDiv.setAttribute('id', data['@attr'].user);
+            } else {
+                // clean out the old
+                while (userDiv.firstChild) {
+                    userDiv.removeChild(userDiv.firstChild);
+                }
             }
 
-            let year = date.getFullYear();
-            let month = (date.getMonth() + 1).toString().padStart(2, 0);
-            let day = date.getDate().toString().padStart(2, 0);
-            let hour = date.getHours().toString().padStart(2, 0);
-            let minute = date.getMinutes().toString().padStart(2, 0);
+            let header = createElem('header');
+            let user = createElem('a', `${data['@attr'].user}::recent`);
+            user.setAttribute('href', LASTFM_URL + '/user/' + data['@attr'].user);
+            header.appendChild(user);
+            userDiv.appendChild(header);
 
-            item.textContent = `[${year}-${month}-${day} ${hour}:${minute}] ${track.artist['#text']} - ${track.name}`;
+            let list = createElem('ul');
+            data.track.forEach((track) => {
+                let item = createElem('li');
+                let nowPlaying = false;
 
-            // Add a music note if the user is currently listening.
-            if (nowPlaying) {
-                item.textContent += ' \u266B';
-            }
+                let date;
+                if (track.hasOwnProperty('date')) {
+                    date = new Date(track.date.uts * 1000);
+                }
+                else {
+                    date = new Date();
+                    nowPlaying = true
+                }
 
-            list.appendChild(item);
+                let year = date.getFullYear();
+                let month = (date.getMonth() + 1).toString().padStart(2, 0);
+                let day = date.getDate().toString().padStart(2, 0);
+                let hour = date.getHours().toString().padStart(2, 0);
+                let minute = date.getMinutes().toString().padStart(2, 0);
+
+                item.textContent = `[${year}-${month}-${day} ${hour}:${minute}] ${track.artist['#text']} - ${track.name}`;
+
+                // Add a music note if the user is currently listening.
+                if (nowPlaying) {
+                    item.textContent += ' \u266B';
+                }
+
+                list.appendChild(item);
+            });
+
+            userDiv.appendChild(list);
+
+            main.appendChild(userDiv);
         });
-
-        userDiv.appendChild(list);
-        main.appendChild(userDiv);
     }
     else {
         let errorParagraph = createElem('p');
@@ -107,6 +110,7 @@ browser.runtime.onMessage.addListener((message) => {
                 errorParagraph.appendChild(optionsLink);
                 break;
 
+            // TODO: Not valid here anymore, move to user loop
             case 'apiFail':
                 errorParagraph.appendChild(createElem('text', ERROR_DESCRIPTIONS[message.name]));
                 errorParagraph.appendChild(createElem('br'));
@@ -122,6 +126,7 @@ browser.runtime.onMessage.addListener((message) => {
                 break;
                 
             default:
+                console.error('Bad message', message);
                 errorParagraph.appendChild(createElem('text', 'Unhandled error. Whoops!'));
                 break;
         }

@@ -19,80 +19,66 @@ gettingStoredSettings.then((settings) => {
     }
 });
 
-/**
- * Wrapper for sending successful messages.
- *
- * @param data Any relevant data for the successful message.
- */
-function sendSuccess(data = {}) {
-    browser.runtime.sendMessage({
-        status: 'success',
-        data: data,
-    });
-}
+// Module for caching API responses and sending message.
+let responseCache = (function() {
+    let module = {};
+    let response = {};
 
-/**
- * Wrapper for sending error messages.
- *
- * @param name The shortname of the error.
- * @param data Any relevant data for the error.
- */
-function sendError(name, data = {}) {
-    browser.runtime.sendMessage({
-        status: 'error',
-        name: name,
-        data: data,
-    });
-}
-
-/**
- * Sets up an Alarm to sleep for ~91 seconds before checking for recent tracks again
- * (the length of The Beatles' "Golden Slumbers")
- */
-function setUpPolling() {
-
-    browser.alarms.onAlarm.addListener((alarm) => {
-        switch(alarm.name) {
-            case 'pollForRecentTracks':
-                const gettingStoredSettings = browser.storage.local.get();
-                gettingStoredSettings.then(getRecentTracks);
-                break;
-
-        default:
-            console.error('No alarm found: %s', alarm.name);
+    module.sendMessage = function() {
+        if (response.hasOwnProperty('status')) {
+            browser.runtime.sendMessage(response);
         }
+    };
 
-    });
+    module.setSuccess = function(responses) {
+        response = {
+            status: 'success',
+            responses: responses
+        };
+        module.sendMessage();
+    };
 
-    browser.alarms.create("pollForRecentTracks", {periodInMinutes: 1.5167});
-}
+    module.setError = function(name) {
+        response = {
+            status: 'error',
+            name: name
+        };
+        module.sendMessage();
+    };
+
+    return module;
+}());
 
 /**
  * Get users' recent tracks.
  */
-function getRecentTracks(storedSettings) {
+function getRecentTracks() {
     // TODO: How to handle settings changes.
-    // TODO: Cache results?  (do we need to if we poll?)
-    // TODO: Locking system?
-    // TODO: Display of multiple users jumps around (House of Pain style) - stop it somehow.
 
-    if (storedSettings['apiKey'].trim().length === 0) {
-        sendError('settingsApiKey');
-        return;
-    }
+    const gettingStoredSettings = browser.storage.local.get();
+    gettingStoredSettings.then(function(storedSettings) {
+        if (storedSettings['apiKey'].trim().length === 0) {
+            responseCache.setError('settingsApiKey');
+            return;
+        }
 
-    if (storedSettings['users'].trim().length === 0) {
-        sendError('settingsUsers');
-        return;
-    }
+        if (storedSettings['users'].trim().length === 0) {
+            responseCache.setError('settingsUsers');
+            return;
+        }
 
-    let users = storedSettings['users'].split(';');
+        let users = storedSettings['users'].split(';');
 
-    // loop through all of our users and fetch those tracks
-    for (var i=0; i < users.length; i++) {
-        let userName = users[i].trim();
-        getRecentTracksForUser(userName, storedSettings['apiKey'], storedSettings['fetchLimit']);
-    }
+        let requests = [];
+        users.forEach(function(user) {
+            requests.push(getRecentTracksForUser(user.trim(), storedSettings['apiKey'], storedSettings['fetchLimit']));
+        });
+
+        // Promise.all() returns all promises in the specified order, so no transforming necessary.
+        Promise.all(requests).then(function(responses) {
+            responseCache.setSuccess(responses);
+        })
+    });
 }
 
 /**
@@ -103,45 +89,71 @@ function getRecentTracks(storedSettings) {
  * @param fetchLimit integer value of how many tracks to fetch
  */
 function getRecentTracksForUser(user, apiKey, fetchLimit) {
-    let url = LASTFM_API_URL +
-        '?method=user.getrecenttracks' +
-        '&api_key=' + encodeURIComponent(apiKey) +
-        '&user=' + encodeURIComponent(user) +
-        '&limit=' + encodeURIComponent(fetchLimit) +
-        '&format=json';
+    return new Promise(function(resolve) {
+        let url = LASTFM_API_URL +
+            '?method=user.getrecenttracks' +
+            '&api_key=' + encodeURIComponent(apiKey) +
+            '&user=' + encodeURIComponent(user) +
+            '&limit=' + encodeURIComponent(fetchLimit) +
+            '&format=json';
 
-    let xhr = new XMLHttpRequest();
-    xhr.open('GET', url);
-    xhr.onreadystatechange = function() {
-        if (this.readyState !== 4) {
-            return;
-        }
+        let xhr = new XMLHttpRequest();
+        xhr.open('GET', url);
+        xhr.onreadystatechange = function () {
+            if (this.readyState !== 4) {
+                return;
+            }
 
-        if (this.status === 200) {
-            sendSuccess(JSON.parse(xhr.response));
-        }
-        else {
-            // Bad requests return status 0.
-            sendError('apiFail', {
-                status: this.status,
-                statusText: this.statusText,
-            });
-        }
-    };
-    xhr.send();
+            let response = {
+                status: xhr.status,
+                statusText: xhr.statusText,
+                response: null
+            };
+
+            try {
+                if (xhr.response.trim().length > 0) {
+                    response.response = JSON.parse(xhr.response);
+                }
+            }
+            catch (e) {
+                console.error("Couldn't parse JSON response", xhr.response);
+            }
+
+            resolve(response);
+        };
+        xhr.send();
+    });
 }
 
 // Listen for messages from the options and newtab pages.
 browser.runtime.onMessage.addListener((action) => {
     switch (action) {
         case 'getRecentTracks':
-            const gettingStoredSettings = browser.storage.local.get();
-            gettingStoredSettings
-                .then(getRecentTracks)      // get recent tracks right away
-                .then(setUpPolling);        // then set up polling so those recent tracks stay recent
+            responseCache.sendMessage();
             break;
 
         default:
             console.error('No action found: %s', action);
     }
 });
+
+/**
+ * Sets up an Alarm to sleep for ~91 seconds before checking for recent tracks again
+ * (the length of The Beatles' "Golden Slumbers")
+ */
+browser.alarms.onAlarm.addListener((alarm) => {
+    switch(alarm.name) {
+        case 'pollForRecentTracks':
+            getRecentTracks();
+            break;
+
+        default:
+            console.error('No alarm found: %s', alarm.name);
+    }
+
+});
+// TODO: Don't set up polling unless API Key and Users are set.
+browser.alarms.create("pollForRecentTracks", {periodInMinutes: 1.5167});
+
+// Kick out the scrobs, mother father.
+getRecentTracks();
