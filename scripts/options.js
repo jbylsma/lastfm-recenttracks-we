@@ -5,7 +5,7 @@
  */
 function saveSettings() {
     let settings = {};
-    document.querySelectorAll('form input:not([type="submit"])').forEach((element) => {
+    document.querySelectorAll('form .option input').forEach((element) => {
         let id;
         id = element.getAttribute('id');
         settings[id] = element.value;
