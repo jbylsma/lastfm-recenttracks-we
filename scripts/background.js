@@ -71,7 +71,11 @@ function getRecentTracks() {
 
         let requests = [];
         users.forEach(function(user) {
-            requests.push(getRecentTracksForUser(user.trim(), storedSettings['apiKey'], storedSettings['fetchLimit']));
+            let apiKey = storedSettings['apiKey'];
+            let fetchLimit = storedSettings['fetchLimit'];
+            user = user.trim();
+
+            requests.push(getRecentTracksForUser(user, apiKey, fetchLimit));
         });
 
         // Promise.all() returns all promises in the specified order, so no transforming necessary.
@@ -84,7 +88,7 @@ function getRecentTracks() {
 /**
  * Fetches recent tracks for the given last.fm user.
  *
- * @param user Username of the last.fm user in question.
+ * @param user The last.fm username, case insensitive.
  * @param apiKey Key used to connect to last.fm API.
  * @param fetchLimit Integer value of how many tracks to fetch.
  */
@@ -100,19 +104,21 @@ function getRecentTracksForUser(user, apiKey, fetchLimit) {
         let xhr = new XMLHttpRequest();
         xhr.open('GET', url);
         xhr.onreadystatechange = function () {
+            // Only process completed requests.
             if (this.readyState !== 4) {
                 return;
             }
 
             let response = {
+                user: user,
                 status: xhr.status,
                 statusText: xhr.statusText,
-                response: null
+                data: null
             };
 
             try {
                 if (xhr.response.trim().length > 0) {
-                    response.response = JSON.parse(xhr.response);
+                    response.data = JSON.parse(xhr.response);
                 }
             }
             catch (e) {

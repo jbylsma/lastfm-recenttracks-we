@@ -13,6 +13,25 @@ a {
     color: #B90000;
 }
 
+ul {
+    margin: 1rem 0 1rem 2rem;
+    padding: 0;
+    list-style-position: inside;
+}
+
+.user {
+    margin: 1rem 0;
+}
+
+.user header {
+    margin: 1rem 0;
+    font-weight: bold;
+}
+
+.user.error p {
+    margin-left: 2rem;
+}
+
 .music-note {
     margin-left: .625rem;
     display: inline-block;

@@ -9,7 +9,6 @@ const LASTFM_URL = 'https://www.last.fm';
 const ERROR_DESCRIPTIONS = {
     settingsApiKey: 'The Last.fm API Key has not been set.',
     settingsUsers: 'No Last.fm users have been set.',
-    apiFail: 'The Last.fm API request failed.',
 };
 
 /**
@@ -46,27 +45,41 @@ browser.runtime.onMessage.addListener((message, sender) => {
 
     if (message.status === 'success') {
         message.responses.forEach(function(response) {
-            let data = response.response.recenttracks;
-
-            // if it doesn't already exist, create a container for all of this user's info; id is the username
-            let userDiv = document.getElementById(data['@attr'].user);
-
-            // if it doesn't exist, create it!   if it does, re-use it
-            if (userDiv == null) {
-                userDiv = createElem('div');
-                userDiv.setAttribute('id', data['@attr'].user);
-            } else {
-                // clean out the old
-                while (userDiv.firstChild) {
-                    userDiv.removeChild(userDiv.firstChild);
-                }
-            }
+            // TODO: Unsanitized, also used for user div's ID.
+            let user = response.user;
 
             let header = createElem('header');
-            let user = createElem('a', `${data['@attr'].user}::recent`);
-            user.setAttribute('href', LASTFM_URL + '/user/' + data['@attr'].user);
-            header.appendChild(user);
+            let userDiv = createElem('div');
+            userDiv.className += 'user';
+            let userHeader;
             userDiv.appendChild(header);
+
+            if (response.status !== 200) {
+                userDiv.className += ' error';
+                userHeader = createElem('text', user);
+                header.appendChild(userHeader);
+
+                let errorText;
+                if (response.status === 0) {
+                    errorText = 'Could not connect to the Last.fm API service.';
+                } else {
+                    errorText = `${response.status}: ${response.statusText}`;
+                }
+
+                userDiv.appendChild(createElem('p', errorText));
+                main.appendChild(userDiv);
+                return;
+            }
+
+            let data = response.data.recenttracks;
+
+            // Create a container for all of this user's info; ID is the username.
+            userDiv.setAttribute('id', data['@attr'].user);
+
+            userHeader = createElem('a', `${data['@attr'].user}::recent`);
+            userHeader.text = `${data['@attr'].user}::recent`;
+            userHeader.setAttribute('href', LASTFM_URL + '/user/' + data['@attr'].user);
+            header.appendChild(userHeader);
 
             let list = createElem('ul');
             data.track.forEach((track) => {
@@ -101,7 +114,6 @@ browser.runtime.onMessage.addListener((message, sender) => {
             });
 
             userDiv.appendChild(list);
-
             main.appendChild(userDiv);
         });
     }
@@ -121,21 +133,6 @@ browser.runtime.onMessage.addListener((message, sender) => {
                 errorParagraph.appendChild(optionsLink);
                 break;
 
-            // TODO: Not valid here anymore, move to user loop
-            case 'apiFail':
-                errorParagraph.appendChild(createElem('text', ERROR_DESCRIPTIONS[message.name]));
-                errorParagraph.appendChild(createElem('br'));
-
-                let explaination;
-                if (message.data.status === 0) {
-                    explaination = 'Could not connect to the Last.fm API service.';
-                }
-                else {
-                    explaination = `${message.data.status}: ${message.data.statusText}`;
-                }
-                errorParagraph.appendChild(createElem('text', explaination));
-                break;
-                
             default:
                 console.error('Bad message', message);
                 errorParagraph.appendChild(createElem('text', 'Unhandled error. Whoops!'));
