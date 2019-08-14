@@ -91,9 +91,10 @@ browser.runtime.onMessage.addListener((message, sender) => {
                 item.textContent = `[${year}-${month}-${day} ${hour}:${minute}] ${track.artist['#text']} - ${track.name}`;
 
                 // Add a music note if the user is currently listening.
-                // TODO: Animation? :)
                 if (nowPlaying) {
-                    item.textContent += ' \u266B';
+                    let active = createElem('span', '\u266B');
+                    active.className = 'music-note';
+                    item.appendChild(active);
                 }
 
                 list.appendChild(item);

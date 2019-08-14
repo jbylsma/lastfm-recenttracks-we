@@ -13,6 +13,27 @@ a {
     color: #B90000;
 }
 
+.music-note {
+    margin-left: .625rem;
+    display: inline-block;
+    animation-duration: 500ms;
+    animation-name: dance;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+    animation-timing-function: steps(3, end);
+    transform-origin: bottom center;
+}
+
+@keyframes dance {
+    from {
+        transform: skew(15deg);
+    }
+
+    to {
+        transform: skew(-30deg);
+    }
+}
+
 #refresh {
     float: right;
 }
