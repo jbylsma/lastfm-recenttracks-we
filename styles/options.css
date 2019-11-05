@@ -1,3 +1,7 @@
+#alert {
+    display: none;
+}
+
 .option {
     margin: 1rem auto;
 }

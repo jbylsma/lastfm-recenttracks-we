@@ -9,18 +9,19 @@
 <form>
     <div class="option">
         <label for="apiKey">Last.fm API Key</label>
-        <input type="text" id="apiKey" autocomplete="off" />
+        <input type="text" id="apiKey" autocomplete="off" disabled="disabled" />
     </div>
     <div class="option">
         <label for="users">Last.fm Users (separate by ';')</label>
-        <input type="text" id="users" />
+        <input type="text" id="users" disabled="disabled" />
     </div>
     <div class="option">
         <label for="fetchLimit">Number of results per user (1-200)</label>
-        <input id="fetchLimit" type="number" min="1" max="200" />
+        <input id="fetchLimit" type="number" min="1" max="200" disabled="disabled" />
     </div>
-    <input type="button" value="Save" />
+    <input type="submit" value="Save" disabled="disabled" />
 </form>
+<div id="alert"></div>
 <script src="scripts/options.js"></script>
 </body>
 </html>
