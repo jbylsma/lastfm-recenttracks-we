@@ -31,7 +31,7 @@ function createElem(type, text = null) {
     return document.createElement(type).appendChild(textNode).parentElement;
 }
 
-// Listen for messages from background Javascript.
+// Listen for messages from background Javascript and display output.
 browser.runtime.onMessage.addListener((message, sender) => {
     // Ignore messages from other tabs.
     if (sender.hasOwnProperty('tab')) {

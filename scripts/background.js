@@ -18,9 +18,15 @@ let responseCache = (function() {
     let response = {};
 
     module.sendMessage = function() {
-        if (response.hasOwnProperty('status')) {
-            browser.runtime.sendMessage(response);
+        // Sanity check the responses.
+        if (!response.hasOwnProperty('status')) {
+            return;
         }
+
+        browser.runtime.sendMessage(response).catch(() => {
+            // No-op. Updating preferences without a newtab page open will cause a "Error: Could not establish
+            // connection. Receiving end does not exist." error.
+        });
     };
 
     module.setSuccess = function(responses) {
@@ -45,6 +51,7 @@ let responseCache = (function() {
 /**
  * Get users' recent tracks.
  */
+
 function getRecentTracks() {
     const gettingStoredSettings = browser.storage.local.get();
     gettingStoredSettings.then(function(storedSettings) {
@@ -149,20 +156,17 @@ function setupPolling(reset = false) {
 
 // Respond to the polling alarms.
 browser.alarms.onAlarm.addListener((alarm) => {
-    switch(alarm.name) {
-        case 'pollForRecentTracks':
-            getRecentTracks();
-            break;
-
-        default:
-            console.error('No alarm found: %s', alarm.name);
+    if (alarm.name === 'pollForRecentTracks') {
+        getRecentTracks();
+    } else {
+        console.error('No alarm found: %s', alarm.name);
     }
 
 });
 
 // Listen for messages from the options and newtab pages.
-browser.runtime.onMessage.addListener((action) => {
-    switch (action) {
+browser.runtime.onMessage.addListener((message) => {
+    switch (message) {
         case 'getRecentTracks':
             responseCache.sendMessage();
             break;
@@ -172,7 +176,7 @@ browser.runtime.onMessage.addListener((action) => {
             break;
 
         default:
-            console.error('No action found: %s', action);
+            console.error('No action found: %s', message);
     }
 });
 
