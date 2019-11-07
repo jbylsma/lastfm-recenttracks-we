@@ -51,7 +51,6 @@ let responseCache = (function() {
 /**
  * Get users' recent tracks.
  */
-
 function getRecentTracks() {
     const gettingStoredSettings = browser.storage.local.get();
     gettingStoredSettings.then(function(storedSettings) {
@@ -161,7 +160,6 @@ browser.alarms.onAlarm.addListener((alarm) => {
     } else {
         console.error('No alarm found: %s', alarm.name);
     }
-
 });
 
 // Listen for messages from the options and newtab pages.
