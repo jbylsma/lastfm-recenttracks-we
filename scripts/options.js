@@ -1,11 +1,11 @@
 'use strict';
 
+const alert = document.querySelector('#alert');
+
 /**
  * Save extension settings.
  */
 function saveSettings(e) {
-    // TODO: Move outside function
-    const alert = document.querySelector('#alert');
     let settings = {};
 
     document.querySelectorAll('form .option input').forEach((element) => {
@@ -21,13 +21,17 @@ function saveSettings(e) {
             console.error(reason);
         })
         .then(() => {
-            // TODO: Make more pretty
+            // Computed style for transition duration is returned in seconds, convert to milliseconds for timeouts.
+            let transitionDuration = parseFloat(getComputedStyle(alert)['transitionDuration']) * 1000;
+
             alert.textContent = 'Settings saved, polling reset';
-            alert.style.display = 'block';
+            alert.classList.add('visible');
             setTimeout(() => {
-                alert.style.display = 'none';
-                alert.textContent = '';
-            }, 2000);
+                alert.classList.remove('visible');
+                setTimeout(() => {
+                    alert.textContent = '';
+                }, transitionDuration)
+            }, transitionDuration + 1000);
 
         });
 

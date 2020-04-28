@@ -150,6 +150,7 @@ function setupPolling(reset = false) {
     browser.alarms.create('pollForRecentTracks', {
         periodInMinutes: POLLING_DELAY,
     });
+
     getRecentTracks();
 }
 
