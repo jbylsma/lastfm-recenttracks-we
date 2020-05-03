@@ -5,6 +5,8 @@ let main = document.querySelector('main');
 
 const LASTFM_URL = 'https://www.last.fm';
 
+const PAGE_TITLE = 'Last.fm Recent Tracks';
+
 // Plain-text descriptions for possible error messages.
 const ERROR_DESCRIPTIONS = {
     settingsApiKey: 'The Last.fm API Key has not been set.',
@@ -44,6 +46,10 @@ browser.runtime.onMessage.addListener((message, sender) => {
     }
 
     if (message.status === 'success') {
+
+        // Keep track of how many users are actively scrobbling
+        let activeScrobblingCount = 0;
+
         message.responses.forEach(function(response) {
             // TODO: Unsanitized, also used for user div's ID.
             let user = response.user;
@@ -108,6 +114,7 @@ browser.runtime.onMessage.addListener((message, sender) => {
                     let active = createElem('span', '\u266B');
                     active.className = 'music-note';
                     item.appendChild(active);
+                    activeScrobblingCount++;
                 }
 
                 list.appendChild(item);
@@ -116,6 +123,15 @@ browser.runtime.onMessage.addListener((message, sender) => {
             userDiv.appendChild(list);
             main.appendChild(userDiv);
         });
+
+        // If any users are actively scrobbling, add a note and count to the page title
+        if (activeScrobblingCount > 0) {
+            document.title = '\u266B (' + activeScrobblingCount + ') - ' + PAGE_TITLE;
+        }
+        else {
+            // Otherwise, set it back to normal if all is quiet on the scrobbling front.
+            document.title = PAGE_TITLE;
+        }
     }
     else {
         let errorParagraph = createElem('p');
