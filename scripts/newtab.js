@@ -33,6 +33,15 @@ function createElem(type, text = null) {
     return document.createElement(type).appendChild(textNode).parentElement;
 }
 
+/**
+ * Sanitize untrust text.
+ *
+ * @param text The text to sanitize
+ */
+function sanitize(text) {
+    return createElem('text', text).textContent
+}
+
 // Listen for messages from background Javascript and display output.
 browser.runtime.onMessage.addListener((message, sender) => {
     // Ignore messages from other tabs.
@@ -51,8 +60,7 @@ browser.runtime.onMessage.addListener((message, sender) => {
         let activeScrobblingCount = 0;
 
         message.responses.forEach(function(response) {
-            // TODO: Unsanitized, also used for user div's ID.
-            let user = response.user;
+            let user = sanitize(response.user);
 
             let header = createElem('header');
             let userDiv = createElem('div');
@@ -69,7 +77,7 @@ browser.runtime.onMessage.addListener((message, sender) => {
                 if (response.status === 0) {
                     errorText = 'Could not connect to the Last.fm API service.';
                 } else {
-                    errorText = `${response.status}: ${response.statusText}`;
+                    errorText = `${sanitize(response.status)}: ${sanitize(response.statusText)}`;
                 }
 
                 userDiv.appendChild(createElem('p', errorText));
@@ -80,11 +88,11 @@ browser.runtime.onMessage.addListener((message, sender) => {
             let data = response.data.recenttracks;
 
             // Create a container for all of this user's info; ID is the username.
-            userDiv.setAttribute('id', data['@attr'].user);
+            userDiv.setAttribute('id', sanitize(data['@attr'].user));
 
-            userHeader = createElem('a', `${data['@attr'].user}::recent`);
-            userHeader.text = `${data['@attr'].user}::recent`;
-            userHeader.setAttribute('href', LASTFM_URL + '/user/' + data['@attr'].user);
+            userHeader = createElem('a', `${sanitize(data['@attr'].user)}::recent`);
+            userHeader.text = `${sanitize(data['@attr'].user)}::recent`;
+            userHeader.setAttribute('href', LASTFM_URL + '/user/' + sanitize(data['@attr'].user));
             header.appendChild(userHeader);
 
             let list = createElem('ul');
@@ -107,7 +115,7 @@ browser.runtime.onMessage.addListener((message, sender) => {
                 let hour = date.getHours().toString().padStart(2, 0);
                 let minute = date.getMinutes().toString().padStart(2, 0);
 
-                item.textContent = `[${year}-${month}-${day} ${hour}:${minute}] ${track.artist['#text']} - ${track.name}`;
+                item.textContent = `[${year}-${month}-${day} ${hour}:${minute}] ${sanitize(track.artist['#text'])} - ${sanitize(track.name)}`;
 
                 // Add a music note if the user is currently listening.
                 if (nowPlaying) {
