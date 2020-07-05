@@ -6,7 +6,7 @@ const DEFAULT_SETTINGS = {
     'users': ''
 };
 
-const LASTFM_API_URL = 'http://ws.audioscrobbler.com/2.0/';
+const LASTFM_API_URL = 'https://ws.audioscrobbler.com/2.0/';
 
 // Poll period for recent tracks period.
 // ~91 seconds (the length of The Beatles' "Golden Slumbers")
