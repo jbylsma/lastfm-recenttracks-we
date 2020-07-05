@@ -87,9 +87,6 @@ browser.runtime.onMessage.addListener((message, sender) => {
 
             let data = response.data.recenttracks;
 
-            // Create a container for all of this user's info; ID is the username.
-            userDiv.setAttribute('id', sanitize(data['@attr'].user));
-
             userHeader = createElem('a', `${sanitize(data['@attr'].user)}::recent`);
             userHeader.text = `${sanitize(data['@attr'].user)}::recent`;
             userHeader.setAttribute('href', LASTFM_URL + '/user/' + sanitize(data['@attr'].user));
