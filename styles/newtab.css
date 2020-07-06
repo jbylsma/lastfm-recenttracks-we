@@ -11,6 +11,11 @@ body {
 
 a {
     color: #B90000;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
 }
 
 ul {

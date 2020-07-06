@@ -93,6 +93,7 @@ browser.runtime.onMessage.addListener((message, sender) => {
             header.appendChild(userHeader);
 
             let list = createElem('ul');
+            list.className = 'tracks';
             data.track.forEach((track) => {
                 let item = createElem('li');
                 let nowPlaying = false;
