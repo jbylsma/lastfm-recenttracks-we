@@ -111,13 +111,16 @@ browser.runtime.onMessage.addListener((message, sender) => {
                 let day = date.getDate().toString().padStart(2, 0);
                 let hour = date.getHours().toString().padStart(2, 0);
                 let minute = date.getMinutes().toString().padStart(2, 0);
+                item.appendChild(createElem('text', `[${year}-${month}-${day} ${hour}:${minute}]`));
 
-                // TODO: Link artist. An artist link is not currently returned in the track API response, so it should
-                //  be a lookup on click event. It may be OK just to parse the artist URL.
-                item.textContent = `[${year}-${month}-${day} ${hour}:${minute}] ${sanitize(track.artist['#text'])} - `;
+                let artist = createElem('a', sanitize(track.artist.name));
+                artist.setAttribute('href', track.artist.url);
+                item.appendChild(createElem('text', ' '))
+                item.appendChild(artist);
 
                 let trackName = createElem('a', sanitize(track.name));
                 trackName.setAttribute('href', track.url);
+                item.appendChild(createElem('text', ' - '))
                 item.appendChild(trackName);
 
                 // Add a music note if the user is currently listening.

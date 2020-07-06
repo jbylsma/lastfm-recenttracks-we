@@ -105,6 +105,7 @@ function getRecentTracksForUser(user, apiKey, fetchLimit) {
             '&api_key=' + encodeURIComponent(apiKey) +
             '&user=' + encodeURIComponent(user) +
             '&limit=' + encodeURIComponent(fetchLimit) +
+            '&extended=1' +
             '&format=json';
 
         let xhr = new XMLHttpRequest();
