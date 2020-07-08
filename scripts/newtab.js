@@ -34,7 +34,7 @@ function createElem(type, text = null) {
 }
 
 /**
- * Sanitize untrust text.
+ * Sanitize untrusted text.
  *
  * @param text The text to sanitize
  */
