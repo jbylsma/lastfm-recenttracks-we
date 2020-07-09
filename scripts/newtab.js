@@ -180,6 +180,8 @@ browser.runtime.onMessage.addListener((message, sender) => {
         }
 
         main.appendChild(errorParagraph);
+
+        document.title = PAGE_TITLE;
     }
 });
 
