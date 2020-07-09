@@ -16,7 +16,7 @@ function saveSettings(e) {
 
     browser.storage.local.set(settings)
         .then(() => {
-            return browser.runtime.sendMessage('resetPolling');
+            return browser.runtime.sendMessage('reinitialize');
         }, reason => {
             console.error(reason);
         })
@@ -24,7 +24,7 @@ function saveSettings(e) {
             // Computed style for transition duration is returned in seconds, convert to milliseconds for timeouts.
             let transitionDuration = parseFloat(getComputedStyle(alert)['transitionDuration']) * 1000;
 
-            alert.textContent = 'Settings saved, polling reset';
+            alert.textContent = 'Settings saved, reinitializing';
             alert.classList.add('visible');
             setTimeout(() => {
                 alert.classList.remove('visible');

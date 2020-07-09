@@ -17,6 +17,10 @@ let responseCache = (function() {
     let module = {};
     let response = {};
 
+    module.reset = function() {
+        response = {};
+    }
+
     module.sendMessage = function() {
         // Sanity check the responses.
         if (!response.hasOwnProperty('status')) {
@@ -77,18 +81,6 @@ function getSettings() {
  */
 function getRecentTracks() {
     getSettings().then(settings => {
-        if (settings['apiKey'].trim().length === 0) {
-            responseCache.setError('settingsApiKey');
-            return;
-        }
-
-        if (settings['users'].trim().length === 0) {
-            responseCache.setError('settingsUsers');
-            return;
-        }
-
-        // TODO: Setup polling here?
-
         let users = settings['users'].split(';');
 
         let requests = [];
@@ -155,47 +147,93 @@ function getRecentTracksForUser(user, apiKey, fetchLimit) {
 }
 
 /**
- * Set up periodic polling for recent tracks.
- *
- * @param reset Whether or not to reset the alarm.
+ * Initialize application.
  */
-function setupPolling(reset = false) {
-    if (reset) {
-        browser.alarms.clear('pollForRecentTracks');
-    }
+function initialize() {
+    let settings = getSettings();
+    settings.then(settings => {
+        if (settings['apiKey'].trim().length === 0) {
+            responseCache.setError('settingsApiKey');
+            return;
+        }
 
-    browser.alarms.create('pollForRecentTracks', {
-        periodInMinutes: POLLING_DELAY,
-    });
+        if (settings['users'].trim().length === 0) {
+            responseCache.setError('settingsUsers');
+            return;
+        }
 
-    getRecentTracks();
+        // Settings are all OK, set up application.
+        setupPolling();
+        browser.alarms.onAlarm.addListener(alarmListener);
+        browser.runtime.onMessage.addListener(resetPollingListener);
+        getRecentTracks();
+    })
 }
 
-// Respond to the polling alarms.
-browser.alarms.onAlarm.addListener((alarm) => {
+/**
+ * Teardown application.
+ */
+function teardown() {
+    responseCache.reset();
+    teardownPolling();
+    browser.alarms.onAlarm.removeListener(alarmListener);
+    browser.runtime.onMessage.removeListener(resetPollingListener);
+}
+
+/**
+ * Set up periodic polling for recent tracks.
+ */
+function setupPolling() {
+    return browser.alarms.create('pollForRecentTracks', {
+        periodInMinutes: POLLING_DELAY,
+    });
+}
+
+/**
+ * Tear down periodic polling.
+ */
+function teardownPolling() {
+    return browser.alarms.clear('pollForRecentTracks');
+}
+
+/**
+ * Listener for polling alarms.
+ *
+ * @param alarm The alarm name to listen for.
+ */
+function alarmListener(alarm) {
     if (alarm.name === 'pollForRecentTracks') {
         getRecentTracks();
     } else {
         console.error('No alarm found: %s', alarm.name);
     }
-});
+}
+
+/**
+ * Listener for resetPolling
+ * @param message The message
+ */
+function resetPollingListener(message) {
+   if (message === 'resetPolling') {
+       teardownPolling()
+           .then(setupPolling)
+           .then(getRecentTracks)
+   }
+}
 
 // Listen for messages from the options and newtab pages.
-browser.runtime.onMessage.addListener((message) => {
+browser.runtime.onMessage.addListener(message => {
     switch (message) {
         case 'getRecentTracks':
             responseCache.sendMessage();
             break;
 
-        case 'resetPolling':
-            setupPolling(true);
+        case 'reinitialize':
+            teardown();
+            initialize();
             break;
-
-        default:
-            console.error('No action found: %s', message);
     }
 });
 
-// TODO: Don't set up polling unless API Key and Users are set.
 // Kick out the scrobs, mother father.
-setupPolling();
+initialize();
