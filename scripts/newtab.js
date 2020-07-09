@@ -157,25 +157,18 @@ browser.runtime.onMessage.addListener((message, sender) => {
   } else {
     const errorParagraph = createElem('p')
 
-    switch (message.name) {
-      case 'settingsApiKey':
-      case 'settingsUsers':
-        // TODO: Make message names a shared module.
-        // eslint-disable-next-line no-case-declarations
-        const optionsLink = createElem('a', ERROR_DESCRIPTIONS[message.name])
-        optionsLink.setAttribute('href', '')
+    if (Object.prototype.hasOwnProperty.call(ERROR_DESCRIPTIONS, message.name)) {
+      const optionsLink = createElem('a', ERROR_DESCRIPTIONS[message.name])
+      optionsLink.setAttribute('href', '')
 
-        optionsLink.addEventListener('click', function () {
-          browser.runtime.openOptionsPage()
-          return false
-        })
-        errorParagraph.appendChild(optionsLink)
-        break
-
-      default:
-        console.error('Bad message', message)
-        errorParagraph.appendChild(createElem('text', 'Unhandled error. Whoops!'))
-        break
+      optionsLink.addEventListener('click', function () {
+        browser.runtime.openOptionsPage()
+        return false
+      })
+      errorParagraph.appendChild(optionsLink)
+    } else {
+      console.error('Bad message', message)
+      errorParagraph.appendChild(createElem('text', 'Unhandled error. Whoops!'))
     }
 
     main.appendChild(errorParagraph)
