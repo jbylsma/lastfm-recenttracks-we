@@ -13,6 +13,14 @@ const ERROR_DESCRIPTIONS = {
     settingsUsers: 'No Last.fm users have been set.',
 };
 
+const REFRESH_BUTTON = createElem('input');
+REFRESH_BUTTON.setAttribute('type', 'button');
+REFRESH_BUTTON.setAttribute('id', 'refresh');
+REFRESH_BUTTON.setAttribute('value', 'Manual Refresh');
+REFRESH_BUTTON.addEventListener('click', function() {
+    browser.runtime.sendMessage('resetPolling');
+});
+
 /**
  * Syntactic sugar for creating elements.
  *
@@ -55,9 +63,10 @@ browser.runtime.onMessage.addListener((message, sender) => {
     }
 
     if (message.status === 'success') {
-
         // Keep track of how many users are actively scrobbling
         let activeScrobblingCount = 0;
+
+        main.appendChild(REFRESH_BUTTON);
 
         message.responses.forEach(function(response) {
             let user = sanitize(response.user);
@@ -172,11 +181,6 @@ browser.runtime.onMessage.addListener((message, sender) => {
 
         main.appendChild(errorParagraph);
     }
-});
-
-const refreshButton = document.querySelector('#refresh');
-refreshButton.addEventListener('click', function() {
-    browser.runtime.sendMessage('resetPolling');
 });
 
 browser.runtime.sendMessage('getRecentTracks');
