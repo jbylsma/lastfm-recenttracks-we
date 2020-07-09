@@ -49,36 +49,52 @@ let responseCache = (function() {
 }());
 
 /**
- * Get users' recent tracks.
+ * Get the extension settings.
  */
-function getRecentTracks() {
-    const gettingStoredSettings = browser.storage.local.get();
-    gettingStoredSettings.then(function(storedSettings) {
-        // Populate missing default settings on startup.
+function getSettings() {
+    let storedSettings = browser.storage.local.get();
+
+    return storedSettings.then(settings => {
+        // Populate missing settings.
+        let updateStoredSettings = false;
         for (let prop in DEFAULT_SETTINGS) {
-            if (!storedSettings.hasOwnProperty(prop)) {
-                storedSettings = DEFAULT_SETTINGS;
-                browser.storage.local.set(DEFAULT_SETTINGS);
-                break;
+            if (!settings.hasOwnProperty(prop)) {
+                settings[prop] = DEFAULT_SETTINGS[prop];
+                updateStoredSettings = true;
             }
         }
 
-        if (storedSettings['apiKey'].trim().length === 0) {
+        if (updateStoredSettings) {
+            browser.storage.local.set(settings);
+        }
+
+        return settings;
+    });
+}
+
+/**
+ * Get users' recent tracks.
+ */
+function getRecentTracks() {
+    getSettings().then(settings => {
+        if (settings['apiKey'].trim().length === 0) {
             responseCache.setError('settingsApiKey');
             return;
         }
 
-        if (storedSettings['users'].trim().length === 0) {
+        if (settings['users'].trim().length === 0) {
             responseCache.setError('settingsUsers');
             return;
         }
 
-        let users = storedSettings['users'].split(';');
+        // TODO: Setup polling here?
+
+        let users = settings['users'].split(';');
 
         let requests = [];
-        users.forEach(function(user) {
-            let apiKey = storedSettings['apiKey'];
-            let fetchLimit = storedSettings['fetchLimit'];
+        users.forEach(user => {
+            let apiKey = settings['apiKey'];
+            let fetchLimit = settings['fetchLimit'];
             user = user.trim();
 
             requests.push(getRecentTracksForUser(user, apiKey, fetchLimit));
