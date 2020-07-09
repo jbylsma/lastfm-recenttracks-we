@@ -12,7 +12,7 @@ const LASTFM_API_URL = 'https://ws.audioscrobbler.com/2.0/';
 // ~91 seconds (the length of The Beatles' "Golden Slumbers")
 const POLLING_DELAY = 1.5167;
 
-// Module for caching API responses and sending message.
+// Module for caching API responses and centralizing messaging.
 let responseCache = (function() {
     let module = {};
     let response = {};
@@ -79,7 +79,7 @@ function getSettings() {
 /**
  * Get users' recent tracks.
  */
-function getRecentTracks() {
+function getAllRecentTracks() {
     getSettings().then(settings => {
         let users = settings['users'].split(';');
 
@@ -89,7 +89,7 @@ function getRecentTracks() {
             let fetchLimit = settings['fetchLimit'];
             user = user.trim();
 
-            requests.push(getRecentTracksForUser(user, apiKey, fetchLimit));
+            requests.push(getUserRecentTracks(user, apiKey, fetchLimit));
         });
 
         // Promise.all() returns all promises in the specified order, so no transforming necessary.
@@ -106,7 +106,7 @@ function getRecentTracks() {
  * @param apiKey Key used to connect to last.fm API.
  * @param fetchLimit Integer value of how many tracks to fetch.
  */
-function getRecentTracksForUser(user, apiKey, fetchLimit) {
+function getUserRecentTracks(user, apiKey, fetchLimit) {
     return new Promise(function(resolve) {
         let url = LASTFM_API_URL +
             '?method=user.getrecenttracks' +
@@ -166,7 +166,7 @@ function initialize() {
         setupPolling();
         browser.alarms.onAlarm.addListener(alarmListener);
         browser.runtime.onMessage.addListener(resetPollingListener);
-        getRecentTracks();
+        getAllRecentTracks();
     })
 }
 
@@ -203,7 +203,7 @@ function teardownPolling() {
  */
 function alarmListener(alarm) {
     if (alarm.name === 'pollForRecentTracks') {
-        getRecentTracks();
+        getAllRecentTracks();
     } else {
         console.error('No alarm found: %s', alarm.name);
     }
@@ -217,7 +217,7 @@ function resetPollingListener(message) {
    if (message === 'resetPolling') {
        teardownPolling()
            .then(setupPolling)
-           .then(getRecentTracks)
+           .then(getAllRecentTracks)
    }
 }
 
