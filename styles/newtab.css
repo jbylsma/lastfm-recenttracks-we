@@ -1,3 +1,15 @@
+:root {
+    --red-100: #e6a3a3;
+    --red-200: #db7a7a;
+    --red-300: #cf5252;
+    --red-400: #c42929;
+    --red-500: #b90000;
+    --red-600: #9b0000;
+    --red-700: #7e0000;
+    --red-800: #600000;
+    --red-900: #430000;
+}
+
 html {
     font-size: 100%;
 }
@@ -10,11 +22,12 @@ body {
 }
 
 a {
-    color: #B90000;
+    color: var(--red-500);
     text-decoration: none;
 }
 
 a:hover {
+    color: var(--red-700);
     text-decoration: underline;
 }
 
@@ -58,6 +71,29 @@ ul {
     }
 }
 
-#refresh {
+button {
+    padding: .25rem .5rem;
+    display: inline-block;
+    border: 1px solid transparent;
+    border-radius: .25rem;
+    text-align: center;
+    vertical-align: middle;
+    background-color: var(--red-500);
+    font-family: inherit;
+    color: #ffffff;
+    user-select: none;
+}
+
+button:hover {
+    background-color: var(--red-600);
+    border-color: var(--red-700);
+}
+
+button:active {
+    background-color: var(--red-700);
+    border-color: var(--red-800);
+}
+
+button.refresh {
     float: right;
 }

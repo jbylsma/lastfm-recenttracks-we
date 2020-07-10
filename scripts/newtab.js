@@ -13,11 +13,11 @@ const ERROR_DESCRIPTIONS = {
   settingsUsers: 'No Last.fm users have been set.'
 }
 
-const REFRESH_BUTTON = createElem('input')
-REFRESH_BUTTON.setAttribute('type', 'button')
-REFRESH_BUTTON.setAttribute('id', 'refresh')
-REFRESH_BUTTON.setAttribute('value', 'Manual Refresh')
-REFRESH_BUTTON.addEventListener('click', function () {
+const REFRESH_BUTTON = createElem('button', 'Refresh')
+REFRESH_BUTTON.classList.add('button')
+REFRESH_BUTTON.classList.add('refresh')
+REFRESH_BUTTON.addEventListener('click', function (e) {
+  e.preventDefault()
   browser.runtime.sendMessage('resetPolling')
 })
 
