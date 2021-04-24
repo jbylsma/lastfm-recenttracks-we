@@ -8,6 +8,33 @@
     --red-700: #7e0000;
     --red-800: #600000;
     --red-900: #430000;
+
+    --blue-grey-100: #ECEFF1;
+    --blue-grey-200: #B0BEC5;
+    --blue-grey-300: #90A4AE;
+    --blue-grey-400: #78909C;
+    --blue-grey-500: #607D8B;
+    --blue-grey-600: #546E7A;
+    --blue-grey-700: #455A64;
+    --blue-grey-800: #37474F;
+    --blue-grey-900: #263238;
+
+    --background-color: #fff;
+    --primary-text-color: #000;
+    --secondary-text-color: var(--red-500);
+    --inverted-text-color: #fff;
+    --accent-color: #000;
+    --hover-color: var(--red-700);
+}
+
+[data-theme="dark"] {
+    --background-color: #121212;
+    --primary-text-color: var(--blue-grey-300);
+    --secondary-text-color: var(--blue-grey-400);
+    --hover-color: var(--blue-grey-700);
+    --hover-border-color: var(--blue-grey-600);
+    --accent-color: var(--blue-grey-300);
+    --inverted-text-color: var(--blue-grey-900);
 }
 
 html {
@@ -15,19 +42,19 @@ html {
 }
 
 body {
-    background-color: #fff;
-    color: #000;
+    background-color: var(--background-color);
+    color: var(--primary-text-color);
     font-family: monospace;
     font-size: 1rem;
 }
 
 a {
-    color: var(--red-500);
+    color: var(--secondary-text-color);
     text-decoration: none;
 }
 
 a:hover {
-    color: var(--red-700);
+    color: var(--hover-color);
     text-decoration: underline;
 }
 
@@ -51,6 +78,7 @@ ul {
 }
 
 .music-note {
+    color: var(--accent-color);
     margin-left: .625rem;
     display: inline-block;
     animation-duration: 500ms;
@@ -78,22 +106,28 @@ button {
     border-radius: .25rem;
     text-align: center;
     vertical-align: middle;
-    background-color: var(--red-500);
+    background-color: var(--secondary-text-color);
     font-family: inherit;
-    color: #ffffff;
+    color: var(--inverted-text-color);
     user-select: none;
 }
 
 button:hover {
-    background-color: var(--red-600);
-    border-color: var(--red-700);
+    background-color: var(--hover-color);
+    border-color: var(--hover-border-color);
 }
 
 button:active {
-    background-color: var(--red-700);
-    border-color: var(--red-800);
+    background-color: var(--hover-color);
+    border-color: var(--hover-border-color);
 }
 
 button.refresh {
+    float: right;
+}
+
+button.paint {
+    clear: right;
+    margin-top: 3px;
     float: right;
 }

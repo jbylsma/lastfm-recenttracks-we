@@ -7,6 +7,9 @@ const LASTFM_URL = 'https://www.last.fm'
 
 const PAGE_TITLE = 'Last.fm Recent Tracks'
 
+const LIGHT_THEME_NAMES = ['Simply Red', 'Red, Red Wine', '99 Red Balloons', 'Little Red Corvette', '(The Angels Wanna Wear My) Red Shoes', 'My Little Red Book', 'Red Dragon Tattoo', 'Red River Rock']
+const DARK_THEME_NAMES = ['Paint It, Black', 'Dark Star', 'Dancing in the Dark', 'The Dark End of the Street', 'Black Cow', 'Black Dog', 'Black Hole Sun', 'Black Magic Woman', 'Blackbird']
+
 // Plain-text descriptions for possible error messages.
 const ERROR_DESCRIPTIONS = {
   settingsApiKey: 'The Last.fm API Key has not been set.',
@@ -19,6 +22,15 @@ REFRESH_BUTTON.classList.add('refresh')
 REFRESH_BUTTON.addEventListener('click', function (e) {
   e.preventDefault()
   browser.runtime.sendMessage('resetPolling')
+})
+
+const PAINT_BUTTON = createElem('button', getRandomThemeName(DARK_THEME_NAMES))
+PAINT_BUTTON.classList.add('button')
+PAINT_BUTTON.classList.add('paint')
+PAINT_BUTTON.setAttribute("id", "theme")
+PAINT_BUTTON.addEventListener('click', function (e) {
+    e.preventDefault()
+    toggleTheme()
 })
 
 /**
@@ -50,6 +62,91 @@ function sanitize (text) {
   return createElem('text', text).textContent
 }
 
+/**
+ * Fetches a random theme name for the button label, based on the provided theme type (light or dark)
+ *
+ * @param themeType either the light or dark theme type
+ */
+function getRandomThemeName(themeType) {
+    let randomThemeIndex = getRandomInt(0, themeType.length)
+    return themeType[randomThemeIndex]
+}
+
+/**
+ * Gets a random integer, inclusive, between specified means
+ * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
+ *
+ * @param minimal integer that could be returned
+ * @param maximum integer that could be returned
+ */
+function getRandomInt(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min) + min); //The maximum is exclusive and the minimum is inclusive
+}
+
+/**
+ * Enable dark theme
+ *
+ * @param settings current local storage settings
+ */
+function enableDarkTheme(settings) {
+    if (document.getElementById("theme") != null) {
+        document.documentElement.setAttribute("data-theme", "dark")
+        document.getElementById("theme").innerHTML= getRandomThemeName(LIGHT_THEME_NAMES)
+        settings.darkTheme = true
+        browser.storage.local.set(settings)
+    }
+}
+
+/**
+ * Enable light theme
+ *
+ * @param settings current local storage settings
+ */
+function enableLightTheme(settings) {
+    if (document.getElementById("theme") != null) {
+        document.documentElement.setAttribute("data-theme", "")
+        document.getElementById("theme").innerHTML= getRandomThemeName(DARK_THEME_NAMES)
+        settings.darkTheme = false
+        browser.storage.local.set(settings)
+    }
+}
+
+/**
+ * Loads the active theme from settings
+ */
+function loadTheme() {
+    const storedSettings = browser.storage.local.get()
+    return storedSettings.then(settings =>  {
+        if (settings.darkTheme) {
+            enableDarkTheme(settings)
+        }
+        else {
+            enableLightTheme(settings)
+        }
+
+        return settings;
+    })
+}
+
+/**
+ * Toggles the current them to the other one
+ */
+function toggleTheme() {
+    const storedSettings = browser.storage.local.get()
+    return storedSettings.then(settings =>  {
+        if (settings.darkTheme) {
+            enableLightTheme(settings)
+        }
+        else {
+            enableDarkTheme(settings)
+        }
+
+        return settings;
+    })
+}
+
 // Listen for messages from background Javascript and display output.
 browser.runtime.onMessage.addListener((message, sender) => {
   // Ignore messages from other tabs.
@@ -62,11 +159,15 @@ browser.runtime.onMessage.addListener((message, sender) => {
     main.removeChild(main.firstChild)
   }
 
+  // Load any stored theme
+  loadTheme()
+
   if (message.status === 'success') {
     // Keep track of how many users are actively scrobbling
     let activeScrobblingCount = 0
 
     main.appendChild(REFRESH_BUTTON)
+    main.appendChild(PAINT_BUTTON)
 
     message.responses.forEach(function (response) {
       const user = sanitize(response.user)
