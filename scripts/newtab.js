@@ -93,7 +93,7 @@ function getRandomInt(min, max) {
 function enableDarkTheme(settings) {
     if (document.getElementById("theme") != null) {
         document.documentElement.setAttribute("data-theme", "dark")
-        document.getElementById("theme").innerHTML= getRandomThemeName(LIGHT_THEME_NAMES)
+        document.getElementById("theme").textContent = getRandomThemeName(LIGHT_THEME_NAMES)
         settings.darkTheme = true
         browser.storage.local.set(settings)
     }
@@ -107,7 +107,7 @@ function enableDarkTheme(settings) {
 function enableLightTheme(settings) {
     if (document.getElementById("theme") != null) {
         document.documentElement.setAttribute("data-theme", "")
-        document.getElementById("theme").innerHTML= getRandomThemeName(DARK_THEME_NAMES)
+        document.getElementById("theme").textContent = getRandomThemeName(DARK_THEME_NAMES)
         settings.darkTheme = false
         browser.storage.local.set(settings)
     }
