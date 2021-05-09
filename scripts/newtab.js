@@ -27,10 +27,10 @@ REFRESH_BUTTON.addEventListener('click', function (e) {
 const PAINT_BUTTON = createElem('button', getRandomThemeName(DARK_THEME_NAMES))
 PAINT_BUTTON.classList.add('button')
 PAINT_BUTTON.classList.add('paint')
-PAINT_BUTTON.setAttribute("id", "theme")
+PAINT_BUTTON.setAttribute('id', 'theme')
 PAINT_BUTTON.addEventListener('click', function (e) {
-    e.preventDefault()
-    toggleTheme()
+  e.preventDefault()
+  toggleTheme()
 })
 
 /**
@@ -67,9 +67,9 @@ function sanitize (text) {
  *
  * @param themeType either the light or dark theme type
  */
-function getRandomThemeName(themeType) {
-    let randomThemeIndex = getRandomInt(0, themeType.length)
-    return themeType[randomThemeIndex]
+function getRandomThemeName (themeType) {
+  const randomThemeIndex = getRandomInt(0, themeType.length)
+  return themeType[randomThemeIndex]
 }
 
 /**
@@ -79,10 +79,11 @@ function getRandomThemeName(themeType) {
  * @param min minimal integer that could be returned
  * @param max maximum integer that could be returned
  */
-function getRandomInt(min, max) {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min) + min); //The maximum is exclusive and the minimum is inclusive
+function getRandomInt (min, max) {
+  min = Math.ceil(min)
+  max = Math.floor(max)
+  // The maximum is exclusive and the minimum is inclusive.
+  return Math.floor(Math.random() * (max - min) + min)
 }
 
 /**
@@ -90,13 +91,13 @@ function getRandomInt(min, max) {
  *
  * @param settings current local storage settings
  */
-function enableDarkTheme(settings) {
-    if (document.getElementById("theme") != null) {
-        document.documentElement.setAttribute("data-theme", "dark")
-        document.getElementById("theme").textContent = getRandomThemeName(LIGHT_THEME_NAMES)
-        settings.darkTheme = true
-        browser.storage.local.set(settings)
-    }
+function enableDarkTheme (settings) {
+  if (document.getElementById('theme') != null) {
+    document.documentElement.setAttribute('data-theme', 'dark')
+    document.getElementById('theme').textContent = getRandomThemeName(LIGHT_THEME_NAMES)
+    settings.darkTheme = true
+    browser.storage.local.set(settings)
+  }
 }
 
 /**
@@ -104,47 +105,45 @@ function enableDarkTheme(settings) {
  *
  * @param settings current local storage settings
  */
-function enableLightTheme(settings) {
-    if (document.getElementById("theme") != null) {
-        document.documentElement.setAttribute("data-theme", "")
-        document.getElementById("theme").textContent = getRandomThemeName(DARK_THEME_NAMES)
-        settings.darkTheme = false
-        browser.storage.local.set(settings)
-    }
+function enableLightTheme (settings) {
+  if (document.getElementById('theme') != null) {
+    document.documentElement.setAttribute('data-theme', '')
+    document.getElementById('theme').textContent = getRandomThemeName(DARK_THEME_NAMES)
+    settings.darkTheme = false
+    browser.storage.local.set(settings)
+  }
 }
 
 /**
  * Loads the active theme from settings
  */
-function loadTheme() {
-    const storedSettings = browser.storage.local.get()
-    return storedSettings.then(settings =>  {
-        if (settings.darkTheme) {
-            enableDarkTheme(settings)
-        }
-        else {
-            enableLightTheme(settings)
-        }
+function loadTheme () {
+  const storedSettings = browser.storage.local.get()
+  return storedSettings.then(settings => {
+    if (settings.darkTheme) {
+      enableDarkTheme(settings)
+    } else {
+      enableLightTheme(settings)
+    }
 
-        return settings;
-    })
+    return settings
+  })
 }
 
 /**
  * Toggles the current them to the other one
  */
-function toggleTheme() {
-    const storedSettings = browser.storage.local.get()
-    return storedSettings.then(settings =>  {
-        if (settings.darkTheme) {
-            enableLightTheme(settings)
-        }
-        else {
-            enableDarkTheme(settings)
-        }
+function toggleTheme () {
+  const storedSettings = browser.storage.local.get()
+  return storedSettings.then(settings => {
+    if (settings.darkTheme) {
+      enableLightTheme(settings)
+    } else {
+      enableDarkTheme(settings)
+    }
 
-        return settings;
-    })
+    return settings
+  })
 }
 
 // Listen for messages from background Javascript and display output.
