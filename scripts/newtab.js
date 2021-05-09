@@ -76,8 +76,8 @@ function getRandomThemeName(themeType) {
  * Gets a random integer, inclusive, between specified means
  * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
  *
- * @param minimal integer that could be returned
- * @param maximum integer that could be returned
+ * @param min minimal integer that could be returned
+ * @param max maximum integer that could be returned
  */
 function getRandomInt(min, max) {
   min = Math.ceil(min);
