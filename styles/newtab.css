@@ -131,3 +131,7 @@ button.paint {
     margin-top: 3px;
     float: right;
 }
+
+a.loved {
+    font-weight: bold;
+}

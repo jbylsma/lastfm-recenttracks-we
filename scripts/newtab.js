@@ -206,6 +206,7 @@ browser.runtime.onMessage.addListener((message, sender) => {
       data.track.forEach((track) => {
         const item = createElem('li')
         let nowPlaying = false
+        let loved = (track.loved > 0)
 
         let date
         if (Object.prototype.hasOwnProperty.call(track, 'date')) {
@@ -224,11 +225,13 @@ browser.runtime.onMessage.addListener((message, sender) => {
 
         const artist = createElem('a', sanitize(track.artist.name))
         artist.setAttribute('href', track.artist.url)
+        if (loved) { artist.className = 'loved' }
         item.appendChild(createElem('text', ' '))
         item.appendChild(artist)
 
         const trackName = createElem('a', sanitize(track.name))
         trackName.setAttribute('href', track.url)
+        if (loved) { trackName.className = 'loved' }
         item.appendChild(createElem('text', ' - '))
         item.appendChild(trackName)
 
