@@ -102,7 +102,7 @@ function getAllRecentTracks () {
 /**
  * Fetches recent tracks for the given last.fm user.
  *
- * @param user The last.fm username, case insensitive.
+ * @param user The last.fm username, case-insensitive.
  * @param apiKey Key used to connect to last.fm API.
  * @param fetchLimit Integer value of how many tracks to fetch.
  */
