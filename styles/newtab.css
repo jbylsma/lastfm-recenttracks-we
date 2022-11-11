@@ -27,14 +27,16 @@
     --hover-color: var(--red-700);
 }
 
-[data-theme="dark"] {
-    --background-color: #121212;
-    --primary-text-color: var(--blue-grey-300);
-    --secondary-text-color: var(--blue-grey-400);
-    --hover-color: var(--blue-grey-700);
-    --hover-border-color: var(--blue-grey-600);
-    --accent-color: var(--blue-grey-300);
-    --inverted-text-color: var(--blue-grey-900);
+@media (prefers-color-scheme: dark) {
+    :root {
+        --background-color: #121212;
+        --primary-text-color: var(--blue-grey-300);
+        --secondary-text-color: var(--blue-grey-400);
+        --hover-color: var(--blue-grey-700);
+        --hover-border-color: var(--blue-grey-600);
+        --accent-color: var(--blue-grey-300);
+        --inverted-text-color: var(--blue-grey-900);
+    }
 }
 
 html {

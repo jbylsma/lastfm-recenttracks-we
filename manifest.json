@@ -20,6 +20,7 @@
     "newtab": "newtab.html"
   },
   "options_ui": {
-    "page": "options.html"
+    "page": "options.html",
+    "browser_style": true
   }
 }
