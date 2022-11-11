@@ -43,7 +43,10 @@ function saveSettings (e) {
 function updateUI (settings) {
   for (const prop in settings) {
     if (Object.prototype.hasOwnProperty.call(settings, prop)) {
-      document.querySelector('#' + prop).value = settings[prop]
+      const elem = document.getElementById(prop)
+      if (elem) {
+        elem.value = settings[prop]
+      }
     }
   }
 }
