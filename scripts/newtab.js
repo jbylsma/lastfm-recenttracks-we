@@ -105,6 +105,7 @@ browser.runtime.onMessage.addListener((message, sender) => {
       list.className = 'tracks'
       data.track.forEach((track) => {
         const item = createElem('li')
+        const loved = (Object.prototype.hasOwnProperty.call(track, 'loved') && track.loved === '1')
         let nowPlaying = false
 
         let date
@@ -131,6 +132,13 @@ browser.runtime.onMessage.addListener((message, sender) => {
         trackName.setAttribute('href', track.url)
         item.appendChild(createElem('text', ' - '))
         item.appendChild(trackName)
+
+        // Add a heart if the user loves the track.
+        if (loved) {
+          const active = createElem('span', '\u2665')
+          active.className = 'heart'
+          item.appendChild(active)
+        }
 
         // Add a music note if the user is currently listening.
         if (nowPlaying) {
