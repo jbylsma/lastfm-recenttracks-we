@@ -23,7 +23,6 @@
     --primary-text-color: #000;
     --secondary-text-color: var(--red-500);
     --inverted-text-color: #fff;
-    --accent-color: #000;
     --hover-color: var(--red-700);
 }
 
@@ -34,7 +33,6 @@
         --secondary-text-color: var(--blue-grey-400);
         --hover-color: var(--blue-grey-700);
         --hover-border-color: var(--blue-grey-600);
-        --accent-color: var(--blue-grey-300);
         --inverted-text-color: var(--blue-grey-900);
     }
 }
@@ -79,8 +77,12 @@ ul {
     margin-left: 2rem;
 }
 
+.heart {
+    margin-left: .625rem;
+    display: inline-block;
+}
+
 .music-note {
-    color: var(--accent-color);
     margin-left: .625rem;
     display: inline-block;
     animation-duration: 500ms;
